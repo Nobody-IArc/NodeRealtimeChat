@@ -1,3 +1,5 @@
+// 로그인 시의 토큰 생성
+
 const jwt = require('jsonwebtoken');
 
 // 넘어온 id에 대하여 토큰 발급

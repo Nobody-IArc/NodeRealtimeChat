@@ -1,3 +1,5 @@
+// 사용자 모델 설계
+
 const mongoose = require('mongoose');
 
 // mongoose 모듈 사용
