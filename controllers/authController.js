@@ -1,33 +1,30 @@
 // 회원 가입 및 인증 관리 컨트롤러
 
 const ChatUser = require('../models/ChatUser');
-const hashPassword = require('../middleware/hashPassword');
+const generateToken = require('../utils/generateToken');
 const comparePassword = require('../utils/comparePassword');
-const generateToken = require("../utils/generateToken");
 
 // 회원 가입
 const register = async (req, res) => {
-    const { username, email } = req.body;
+    const { username, email, password } = req.body;
 
     try {
         // 필수 입력 갑 체크
-        if (!username || !email) {
+        if (!username || !email || !password) {
             return res
                 .status(400)
                 .json({ message: '필수 입력 값이 누락되었습니다.' });
         }
 
-        // 중복 가입 방지
-        const checkDuplicate = await ChatUser.findOne({ username: username });
+        // 중복 가입 방지 - 이메일로 체크
+        const checkDuplicate = await ChatUser.findOne({ email: email });
         if (checkDuplicate) {
             return res
                 .status(409)
                 .json({ message: '이미 등록된 사용자입니다.' });
         }
 
-        // 입력 받은 패스워드 해시
-        const hashedPassword = await hashPassword(req);
-        const newUser = new ChatUser({ username, email, hashedPassword });
+        const newUser = new ChatUser({ username, email, password });
         await newUser.save();
 
         res.status(201).json({
@@ -35,7 +32,9 @@ const register = async (req, res) => {
             userId: newUser._id,
         });
     } catch (err) {
-        return res.status(500).json({ message: '회원 가입 실패', error: err });
+        return res
+            .status(500)
+            .json({ message: '회원 가입 실패', error: err.message });
     }
 };
 
@@ -45,21 +44,30 @@ const login = async (req, res) => {
 
     try {
         if (!email || !password) {
-            return res.status(400).json({ message: '이메일과 비밀번호를 입력해야합니다.' });
+            return res
+                .status(400)
+                .json({ message: '이메일과 비밀번호를 입력해야합니다.' });
         }
 
         // 이메일 또는 비밀번호가 잘못되었다는 알림을 통해 보안 강화
         const loggedInUser = await ChatUser.findOne({ email: email });
         if (!loggedInUser) {
-            return res.status(401).json({ message: '이메일 또는 비밀번호가 잘못되었습니다.'});
+            return res
+                .status(401)
+                .json({ message: '이메일 또는 비밀번호가 잘못되었습니다.' });
         }
 
-        const checkPassword = await comparePassword(password, loggedInUser.password);
+        const checkPassword = await comparePassword(
+            password,
+            loggedInUser.password
+        );
         if (!checkPassword) {
-            return res.status(401).json({ message: '이메일 또는 비밀번호가 잘못되었습니다.'})
+            return res
+                .status(401)
+                .json({ message: '이메일 또는 비밀번호가 잘못되었습니다.' });
         }
 
-        const token = generateToken(loggedInUser._id);
+        const token = await generateToken(loggedInUser._id);
 
         res.status(200).json({
             message: '로그인 성공',
