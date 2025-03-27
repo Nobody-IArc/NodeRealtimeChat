@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// mongoose 모듈 사용
 const chatUserSchema = new mongoose.Schema(
     {
         username: {

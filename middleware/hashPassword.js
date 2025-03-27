@@ -2,6 +2,7 @@
 
 const bcrypt = require('bcrypt');
 
+// 패스워드 해시
 const hashPassword = async (req, res, next) => {
     // try / catch 문으로 요청의 body 에 password 가 넘어왔는지 체크 후 작동
     try {

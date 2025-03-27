@@ -1,5 +1,5 @@
 // MongoDB 연결을 위한 파일
-// Local 에 설치한 MongoDB와 연동 MONGODB_URI 는 환경변수로 가져옴x
+// Local 에 설치한 MongoDB와 연동 MONGODB_URI 는 환경변수로 가져옴
 
 const mongoose = require('mongoose');
 
