@@ -67,6 +67,7 @@ const login = async (req, res) => {
                 .json({ message: '이메일 또는 비밀번호가 잘못되었습니다.' });
         }
 
+        // 위의 검증 완료시 토큰 발급
         const token = await generateToken(loggedInUser._id);
 
         res.status(200).json({

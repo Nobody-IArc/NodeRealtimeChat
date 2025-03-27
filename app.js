@@ -4,7 +4,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 
 // 직접 만든 라우터
-const authRouter = require('./routes/authRouter');
+const router = require('./routes');
 
 // 설정 파일 및 미들웨어
 const dbConnect = require('./config/dbConnection');
@@ -22,8 +22,9 @@ await dbConnect();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 라우터 경로 지정 - 추후에 index.js 등의 파일로 통합 및 분리 예정
-app.use('/auth', authRouter);
+// 라우터 경로 지정 - 추후에 index.js 등의 파일로 통합 및 분리 예정 - 완료
+// 확장성 및 설정을 위해 '/api' 경로 설정
+app.use('/api', router);
 
 // 환경 변수에서 존재하는 포트 혹은 3000 번 포트로 실행
 const port = process.env.PORT || 3000;

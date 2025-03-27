@@ -1,4 +1,4 @@
-// 로그인 시의 토큰 생성
+// 로그인 시의 토큰 생성g
 
 const jwt = require('jsonwebtoken');
 

@@ -9,11 +9,12 @@ const chatRoomSchema = new mongoose.Schema({
             required: true,
             trim: true,
         },
-        // 채팅방 설명
+        // 채팅방 설명 - default: '' 추가
         description: {
             type: String,
             required: false,
             trim: true,
+            default: '',
         },
         // 채팅방 타이틀 사진
         titleImage: {
@@ -33,10 +34,11 @@ const chatRoomSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'ChatUser',
                 required: false,
+                default: '',
             },
         ],
     },
     { timestamps: true }
 );
 
-module.exports = mongoose.models('ChatRoom', chatRoomSchema);
+module.exports = mongoose.model('ChatRoom', chatRoomSchema);
