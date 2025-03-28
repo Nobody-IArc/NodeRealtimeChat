@@ -56,7 +56,11 @@ const deleteMessage = async (req, res) => {
                 .json({ message: '삭제할 권한이 없습니다. ' });
         }
 
+        const roomId = message.room.toString();
         await message.deleteOne();
+
+        // 채팅방에 메시지 삭제 알림
+        req.io.to(roomId).emit('messageDeleted', { messageId: messageId });
 
         res.status(200).json({ message: '메시지 삭제 성공' });
     } catch (err) {

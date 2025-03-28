@@ -15,6 +15,7 @@ const router = require('./routes');
 
 // 설정 파일 및 미들웨어
 const dbConnect = require('./config/dbConnection');
+const ioMiddleware = require('./middleware/ioMiddleware');
 
 // app 객체에 express 서버 할당
 const app = express();
@@ -43,6 +44,9 @@ const startServer = async () => {
 
     // 소켓 핸들러 등록
     socketHandler(io);
+
+    // io 사용을 위해 등록
+    app.use(ioMiddleware(server));
 
     // 환경 변수에서 존재하는 포트 혹은 3000 번 포트로 실행
     const port = process.env.PORT || 3000;

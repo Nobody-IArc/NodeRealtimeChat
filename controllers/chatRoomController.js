@@ -1,6 +1,7 @@
 // 채팅방 컨트롤러
 
 const ChatRoom = require('../models/ChatRoom');
+const ChatUser = require('../models/ChatUser');
 
 // 채팅방 생성
 const createChatRoom = async (req, res) => {
@@ -140,9 +141,57 @@ const joinChatRoom = async (req, res) => {
     }
 };
 
+// 채팅방 퇴장
+const leaveChatRoom = async (req, res) => {
+    const userId = req.user.userId;
+    const roomId = req.params.id;
+
+    try {
+        const chatRoom = await ChatRoom.findById(roomId);
+
+        // 채팅방 존재 여부 확인
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '채팅방을 찾을 수 없습니다. ' });
+        }
+
+        // 채팅방에 존재하는 참여자인지 확인
+        if (!chatRoom.participants.includes(userId)) {
+            return res
+                .status(400)
+                .json({ message: '채팅방에 존재하지 않는 사용자입니다.' });
+        }
+
+        const user = await ChatUser.findById(userId);
+
+        // 필터를 통해 참여자 목록 제거 후 새롭게 반환
+        chatRoom.participants = chatRoom.participants.filter(
+            participant => participant.toString() !== userId
+        );
+
+        await chatRoom.save();
+
+        // 소켓에 알림 전송
+        req.io.to(roomId).emit('userLeaveRoom', {
+            userId: userId,
+            username: user.username,
+            message: `${user.username} 님이 방을 나가셨습니다.`,
+        });
+
+        return res.status(200).json({ message: '채팅방 나가기 성공' });
+    } catch (err) {
+        return res.status(500).json({
+            message: '채팅방을 나갈 수 없습니다.',
+            error: err.message,
+        });
+    }
+};
+
 module.exports = {
     createChatRoom,
     getAllChatRooms,
     getChatRoomById,
     joinChatRoom,
+    leaveChatRoom,
 };

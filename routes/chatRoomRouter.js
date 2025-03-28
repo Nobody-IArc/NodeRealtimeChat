@@ -8,6 +8,7 @@ const {
     getAllChatRooms,
     getChatRoomById,
     joinChatRoom,
+    leaveChatRoom,
 } = require('../controllers/chatRoomController');
 
 // 경로 지정
@@ -15,5 +16,6 @@ router.post('/create', authMiddleware, createChatRoom);
 router.get('/', authMiddleware, getAllChatRooms);
 router.get('/:id', authMiddleware, getChatRoomById);
 router.post('/:id/join', authMiddleware, joinChatRoom);
+router.post('/:id/leave', authMiddleware, leaveChatRoom);
 
 module.exports = router;
