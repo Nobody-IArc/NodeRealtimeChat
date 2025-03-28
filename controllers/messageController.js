@@ -3,6 +3,7 @@
 const Message = require('../models/message');
 const mongoose = require('mongoose');
 
+// 채팅방 입장 시 이전 n 개의 메시지를 띄워주는 기능
 const getMessageByRoom = async (req, res) => {
     const roomId = req.params.id;
     const { lastMessageId } = req.query;
@@ -34,4 +35,36 @@ const getMessageByRoom = async (req, res) => {
     }
 };
 
-module.exports = { getMessageByRoom };
+// 사용자 인증 후 본인이 보낸 메시지 삭제
+const deleteMessage = async (req, res) => {
+    const messageId = req.params.id;
+    const userId = req.user.userId;
+
+    try {
+        const message = await Message.findById(messageId);
+        // 메시지 존재 여부 확인
+        if (!message) {
+            return res
+                .status(404)
+                .json({ message: '메시지를 찾을 수 없습니다.' });
+        }
+
+        // 삭제 권한 확인
+        if (message.sender.toString() !== userId.toString()) {
+            return res
+                .status(403)
+                .json({ message: '삭제할 권한이 없습니다. ' });
+        }
+
+        await message.deleteOne();
+
+        res.status(200).json({ message: '메시지 삭제 성공' });
+    } catch (err) {
+        res.status(500).json({
+            message: '삭제할 수 없습니다. ',
+            error: err.message,
+        });
+    }
+};
+
+module.exports = { getMessageByRoom, deleteMessage };
