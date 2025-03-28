@@ -74,4 +74,75 @@ const getAllChatRooms = async (req, res) => {
     }
 };
 
-module.exports = { createChatRoom, getAllChatRooms };
+// 선택된 채팅방 상세 조회
+const getChatRoomById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const chatRoom = await ChatRoom.findById(id);
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '존재하지 않는 채팅방입니다.' });
+        }
+        res.status(200).json({
+            message: '조회 성공',
+            chatRoom: {
+                _id: id,
+                name: chatRoom.roomName,
+                description: chatRoom.description,
+                image: chatRoom.titleImage,
+                creator: chatRoom.roomCreator,
+                participantCount: chatRoom.participants.length,
+            },
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: '조회 실패',
+            error: err.message,
+        });
+    }
+};
+
+// 채팅방 입장
+const joinChatRoom = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.userId;
+
+    try {
+        const chatRoom = await ChatRoom.findById(id);
+
+        // 채팅방이 존재하는지 확인
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '존재하지 않는 채팅방입니다.' });
+        }
+
+        // 중복 참여 확인
+        const alreadyJoinedChatRoom = chatRoom.participants.includes(userId);
+        if (!alreadyJoinedChatRoom) {
+            return res.status(200).json({
+                message: '이미 참여 중인 채팅방입니다.',
+            });
+        }
+
+        // 채팅방 존재 여부 및 중복 참여 여부 확인 이후
+        chatRoom.participants.push(userId);
+        await chatRoom.save();
+
+        res.status(200).json({
+            message: '채팅방 참여 성공',
+            participants: chatRoom.participants.length,
+        });
+    } catch (err) {
+        res.status(500).json({ message: '입장 실패', error: err.message });
+    }
+};
+
+module.exports = {
+    createChatRoom,
+    getAllChatRooms,
+    getChatRoomById,
+    joinChatRoom,
+};
