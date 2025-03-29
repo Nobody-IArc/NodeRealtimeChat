@@ -2,6 +2,7 @@
 
 const ChatRoom = require('../models/ChatRoom');
 const ChatUser = require('../models/ChatUser');
+const Message = require('../models/Message');
 
 // 채팅방 생성
 const createChatRoom = async (req, res) => {
@@ -105,6 +106,47 @@ const getChatRoomById = async (req, res) => {
     }
 };
 
+// 채팅방 삭제 - 채팅방 생성자 id 확인 후 삭제 절차
+const deleteChatRoom = async (req, res) => {
+    const roomId = req.params.id;
+    const userId = req.user.userId;
+
+    try {
+        const chatRoom = await ChatRoom.findById(roomId);
+
+        // 채팅방 존재 유무 확인
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '채팅방이 존재하지 않습니다.' });
+        }
+
+        // 채팅방 생성자 확인
+        if (chatRoom.roomCreator.toString() !== userId) {
+            return res.status(403).json({ message: '삭제 권한이 없습니다.' });
+        }
+
+        // 채팅방의 메시지 삭제
+        await Message.deleteMany({ roomId: roomId });
+
+        // 채팅방 삭제
+        await chatRoom.deleteOne();
+
+        // 소켓 알림
+        req.io.to(roomId).emit('chatRoomDeleted', {
+            roomId: roomId,
+            message: '채팅방이 삭제되었습니다.',
+        });
+
+        res.status(200).json({ message: `${roomId} 채팅방이 삭제되었습니다.` });
+    } catch (err) {
+        res.status(500).json({
+            message: '채팅방 삭제 실패',
+            error: err.message,
+        });
+    }
+};
+
 // 채팅방 입장
 const joinChatRoom = async (req, res) => {
     const { id } = req.params;
@@ -192,6 +234,7 @@ module.exports = {
     createChatRoom,
     getAllChatRooms,
     getChatRoomById,
+    deleteChatRoom,
     joinChatRoom,
     leaveChatRoom,
 };
