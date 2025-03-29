@@ -310,6 +310,71 @@ const getParticipants = async (req, res) => {
     }
 };
 
+// 방장 권한 - 사용자 강제 퇴장
+const kickUserFromChatRoom = async (req, res) => {
+    const roomId = req.params.id;
+    const userId = req.user.userId;
+    const { targetUserId } = req.body;
+
+    try {
+        const chatRoom = await ChatRoom.findById(roomId);
+
+        // 채팅방 존재 여부
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '채팅방을 찾을 수 없습니다.' });
+        }
+
+        // 채팅방 생성자 권한 확인
+        if (chatRoom.roomCreator.toString() !== userId) {
+            return res
+                .status(403)
+                .json({ message: '강제 퇴장 권한이 없습니다.' });
+        }
+
+        // 채팅방 생성자가 본인을 퇴장시키려 하는지 확인
+        if (userId === targetUserId) {
+            return res
+                .status(400)
+                .json({ message: '본인을 강제 퇴장시킬 수 없습니다.' });
+        }
+
+        // 채팅방 참여자에 해당 유저가 있는지 확인
+        if (!chatRoom.participants.includes(targetUserId)) {
+            return res
+                .status(404)
+                .json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+
+        // 필터를 통해 제거 후 새로운 참여자 리스트 반환
+        chatRoom.participants = chatRoom.participants.filter(
+            participant => participant.toString() !== targetUserId
+        );
+        await chatRoom.save();
+
+        // 소켓 알림을 위한 데이터
+        const kickedUser = await ChatUser.findById(targetUserId);
+        if (!kickedUser) {
+            return res
+                .status(404)
+                .json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+
+        req.io.to(roomId).emit('userKicked', {
+            userId: targetUserId,
+            username: kickedUser.username,
+            message: `${kickedUser.username} 님이 강제 퇴장 당했습니다.`,
+        });
+
+        return res.status(200).json({ message: '강제 퇴장 처리 성공' });
+    } catch (err) {
+        return res
+            .status(500)
+            .json({ message: '강제 퇴장 처리 실패', error: err.message });
+    }
+};
+
 module.exports = {
     createChatRoom,
     getAllChatRooms,
@@ -319,4 +384,5 @@ module.exports = {
     joinChatRoom,
     leaveChatRoom,
     getParticipants,
+    kickUserFromChatRoom,
 };
