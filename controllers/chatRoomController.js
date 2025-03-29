@@ -277,6 +277,39 @@ const leaveChatRoom = async (req, res) => {
     }
 };
 
+const getParticipants = async (req, res) => {
+    const roomId = req.params.id;
+
+    try {
+        const chatRoom = await ChatRoom.findById(roomId).populate(
+            'participants',
+            'username email'
+        );
+
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '채팅방을 찾을 수 없습니다.' });
+        }
+
+        if (!chatRoom.participants.length <= 0) {
+            return res
+                .status(404)
+                .json({ message: '채팅방 참여자가 존재하지 않습니다.' });
+        }
+
+        res.status(200).json({
+            message: '참여자 목록 조회 성공',
+            participants: chatRoom.participants,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: '참여자 목록 조회 실패',
+            error: err.message,
+        });
+    }
+};
+
 module.exports = {
     createChatRoom,
     getAllChatRooms,
@@ -285,4 +318,5 @@ module.exports = {
     deleteChatRoom,
     joinChatRoom,
     leaveChatRoom,
+    getParticipants,
 };
