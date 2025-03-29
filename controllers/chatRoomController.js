@@ -106,6 +106,53 @@ const getChatRoomById = async (req, res) => {
     }
 };
 
+// 채팅방 수정 - 채팅방 생성자 id 확인 후 수정 동작
+const updateChatRoom = async (req, res) => {
+    const roomId = req.params.id;
+    const userId = req.user.userId;
+    const { roomName, roomDescription, roomTitleImage } = req.body;
+
+    try {
+        const chatRoom = await ChatRoom.findById(roomId);
+
+        // 전달된 값이 존재하는지 확인
+        if (!roomName || !roomDescription || !roomTitleImage) {
+            return res
+                .status(400)
+                .json({ message: '수정 값을 입력해야 합니다.' });
+        }
+
+        // 채팅방 존재 유무 확인
+        if (!chatRoom) {
+            return res
+                .status(404)
+                .json({ message: '채팅방이 존재하지 않습니다.' });
+        }
+
+        // 채팅방 생성자 일치 여부 확인
+        if (chatRoom.roomCreator.toString() !== userId) {
+            return res.status(403).json({ message: '수정 권한이 없습니다.' });
+        }
+
+        // 변경된 필드가 있는 경우에만 수정
+        if (roomName) chatRoom.roomName = roomName;
+        if (roomDescription) chatRoom.description = roomDescription;
+        if (roomTitleImage) chatRoom.titleImage = roomTitleImage;
+
+        await chatRoom.save();
+
+        res.status(200).json({
+            message: '채팅방 정보가 수정되었습니다.',
+            chatRoom: chatRoom,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: '채팅방 수정 실패',
+            error: err.message,
+        });
+    }
+};
+
 // 채팅방 삭제 - 채팅방 생성자 id 확인 후 삭제 절차
 const deleteChatRoom = async (req, res) => {
     const roomId = req.params.id;
@@ -234,6 +281,7 @@ module.exports = {
     createChatRoom,
     getAllChatRooms,
     getChatRoomById,
+    updateChatRoom,
     deleteChatRoom,
     joinChatRoom,
     leaveChatRoom,
