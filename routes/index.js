@@ -8,11 +8,13 @@ const authRouter = require('./authRouter');
 const chatRoomRouter = require('./chatRoomRouter');
 const messageRouter = require('./messageRouter');
 const postRouter = require('./postRouter');
+const fortuneRouter = require('./fortuneRouter');
 
 // 라우터 경로 지정
 router.use('/auth', authRouter);
 router.use('/chat-room', chatRoomRouter);
 router.use('/chat-room', messageRouter);
 router.use('/post', postRouter);
+router.use('/fortune', fortuneRouter);
 
 module.exports = router;
