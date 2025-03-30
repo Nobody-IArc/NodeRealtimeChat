@@ -1,3 +1,16 @@
+// 타로 카드 컨트롤러
+
+/**
+ *
+ * @typedef {Object} TarotCard
+ * @property {number} number
+ * @property {string} name
+ * @property {string} korean
+ * @property {string} meaning
+ * @property {string} comment
+ */
+
+/** @type {TarotCard[]} */
 const tarotCards = require('../tarot/tarotCards');
 
 // 추후 Redis 연결을 위해 미리 작성
