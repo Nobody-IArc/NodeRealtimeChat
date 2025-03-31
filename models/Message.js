@@ -2,7 +2,15 @@
 
 const mongoose = require('mongoose');
 
-const messageModel = new mongoose.Schema(
+// JSDoc
+/**
+ * @typedef {Object} MessageSchema
+ * @property {import('mongoose').Schema.Types.ObjectId} room
+ * @property {import('mongoose').Schema.Types.ObjectId} sender
+ * @property {string} content
+ */
+
+const messageSchema = new mongoose.Schema(
     {
         room: {
             type: mongoose.Schema.Types.ObjectId,
@@ -23,4 +31,4 @@ const messageModel = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model('Message', messageModel);
+module.exports = mongoose.model('Message', messageSchema);

@@ -1,5 +1,7 @@
 // Post 모델을 다루는 컨트롤러
 
+// JSDoc
+/** @type {import('mongoose').Model<import('../models/Post').PostSchema>} */
 const Post = require('../models/Post');
 
 // 게시글 작성
@@ -91,6 +93,7 @@ const updatePost = async (req, res) => {
     }
 
     try {
+        /** @type {import('mongoose').Document & PostSchema} */
         const post = await Post.findById(postId);
 
         // 게시글 존재 여부 확인
@@ -129,6 +132,7 @@ const deletePost = async (req, res) => {
     const userId = req.user.userId;
 
     try {
+        /** @type {import('mongoose').Document & PostSchema} */
         const post = await Post.findById(postId);
 
         // 게시글 존재 여부 확인

@@ -1,7 +1,13 @@
 // 채팅방 컨트롤러
 
+// JSDoc
+/** @type {import('mongoose').Model<import('../models/ChatRoom').ChatRoomSchema>} */
 const ChatRoom = require('../models/ChatRoom');
+
+/** @type {import('mongoose').Model<import('../models/ChatUser').ChatUserSchema>} */
 const ChatUser = require('../models/ChatUser');
+
+/** @type {import('mongoose').Model<import('../models/Message').MessageSchema>} */
 const Message = require('../models/Message');
 
 // 채팅방 생성
@@ -17,6 +23,8 @@ const createChatRoom = async (req, res) => {
 
     try {
         // req 에서 받아온 값으로 새로운 도큐먼트에 값 매핑
+
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const newChatRoom = new ChatRoom({
             roomName: roomName,
             description: roomDescription,
@@ -81,6 +89,7 @@ const getChatRoomById = async (req, res) => {
     const { id } = req.params;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(id);
         if (!chatRoom) {
             return res
@@ -113,6 +122,7 @@ const updateChatRoom = async (req, res) => {
     const { roomName, roomDescription, roomTitleImage } = req.body;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId);
 
         // 전달된 값이 존재하는지 확인
@@ -159,6 +169,7 @@ const deleteChatRoom = async (req, res) => {
     const userId = req.user.userId;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId);
 
         // 채팅방 존재 유무 확인
@@ -200,6 +211,7 @@ const joinChatRoom = async (req, res) => {
     const userId = req.user.userId;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(id);
 
         // 채팅방이 존재하는지 확인
@@ -236,6 +248,7 @@ const leaveChatRoom = async (req, res) => {
     const roomId = req.params.id;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId);
 
         // 채팅방 존재 여부 확인
@@ -252,6 +265,7 @@ const leaveChatRoom = async (req, res) => {
                 .json({ message: '채팅방에 존재하지 않는 사용자입니다.' });
         }
 
+        /** @type {import('mongoose').Document & ChatUserSchema} */
         const user = await ChatUser.findById(userId);
 
         // 필터를 통해 참여자 목록 제거 후 새롭게 반환
@@ -281,6 +295,7 @@ const getParticipants = async (req, res) => {
     const roomId = req.params.id;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId).populate(
             'participants',
             'username email'
@@ -317,6 +332,7 @@ const kickUserFromChatRoom = async (req, res) => {
     const { targetUserId } = req.body;
 
     try {
+        /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId);
 
         // 채팅방 존재 여부
@@ -354,6 +370,7 @@ const kickUserFromChatRoom = async (req, res) => {
         await chatRoom.save();
 
         // 소켓 알림을 위한 데이터
+        /** @type {import('mongoose').Document & ChatUserSchema} */
         const kickedUser = await ChatUser.findById(targetUserId);
         if (!kickedUser) {
             return res

@@ -1,5 +1,7 @@
 // 메시지 관련 컨트롤러
 
+// JSDoc
+/** @type {import('mongoose').Model<import('../models/Message').MessageSchema>} */
 const Message = require('../models/message');
 const mongoose = require('mongoose');
 
@@ -41,6 +43,7 @@ const deleteMessage = async (req, res) => {
     const userId = req.user.userId;
 
     try {
+        /** @type {import('mongoose').Document & MessageSchema} */
         const message = await Message.findById(messageId);
         // 메시지 존재 여부 확인
         if (!message) {

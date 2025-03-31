@@ -1,5 +1,8 @@
 // 회원 가입 및 인증 관리 컨트롤러
 
+// JSDoc
+
+/** @type {import('mongoose').Model<import('../models/ChatUser').ChatUserSchema>} */
 const ChatUser = require('../models/ChatUser');
 const generateToken = require('../utils/generateToken');
 const comparePassword = require('../utils/comparePassword');
@@ -50,6 +53,7 @@ const login = async (req, res) => {
         }
 
         // 이메일 또는 비밀번호가 잘못되었다는 알림을 통해 보안 강화
+        /** @type {import('mongoose').Document & ChatUserSchema} */
         const loggedInUser = await ChatUser.findOne({ email: email });
         if (!loggedInUser) {
             return res

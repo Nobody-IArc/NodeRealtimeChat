@@ -2,6 +2,14 @@
 
 const mongoose = require('mongoose');
 
+// JSDoc
+/**
+ * @typedef {Object} ChatUserSchema
+ * @property {string} username
+ * @property {string} email
+ * @property {string} password
+ */
+
 // mongoose 모듈 사용
 const chatUserSchema = new mongoose.Schema(
     {

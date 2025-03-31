@@ -2,6 +2,16 @@
 
 const mongoose = require('mongoose');
 
+// JSDoc
+/**
+ * @typedef {Object} ChatRoomSchema
+ * @property {string} roomName
+ * @property {string} description
+ * @property {string} titleImage
+ * @property {import('mongoose').Types.ObjectId} roomCreator
+ * @property {import('mongoose').Types.ObjectId[]} participants
+ */
+
 const chatRoomSchema = new mongoose.Schema({
         // 채팅방 이름
         roomName: {

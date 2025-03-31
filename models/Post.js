@@ -2,6 +2,15 @@
 
 const mongoose = require('mongoose');
 
+// JSDoc
+/**
+ * @typedef {Object} PostSchema
+ * @property {import('mongoose').Types.ObjectId} writer
+ * @property {string} title
+ * @property {string} content
+ * @property {string} image
+ */
+
 const postSchema = new mongoose.Schema({
         writer: {
             type: mongoose.Schema.Types.ObjectId,
