@@ -1,15 +1,17 @@
 // 채팅방 모델 설계
 
 const mongoose = require('mongoose');
+const allowedTags = require('../utils/tags');
 
 // JSDoc
 /**
  * @typedef {Object} ChatRoomSchema
  * @property {string} roomName
- * @property {string} description
- * @property {string} titleImage
+ * @property {string} [description]
+ * @property {string} [titleImage]
  * @property {import('mongoose').Types.ObjectId} roomCreator
- * @property {import('mongoose').Types.ObjectId[]} participants
+ * @property {import('mongoose').Types.ObjectId[]} [participants]
+ * @property {string[]} [tags]
  */
 
 const chatRoomSchema = new mongoose.Schema({
@@ -47,6 +49,15 @@ const chatRoomSchema = new mongoose.Schema({
                 default: '',
             },
         ],
+        tags: {
+            type: [String],
+            required: false,
+            default: [],
+            validate: {
+                validator: tags => tags.every(tag => allowedTags.includes(tag)),
+                message: '사용할 수 없는 태그가 있습니다.',
+            },
+        },
     },
     { timestamps: true }
 );

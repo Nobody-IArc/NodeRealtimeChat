@@ -10,15 +10,25 @@ const ChatUser = require('../models/ChatUser');
 /** @type {import('mongoose').Model<import('../models/Message').MessageSchema>} */
 const Message = require('../models/Message');
 
+// 허용된 태그 목록 가져오기
+const allowedTags = require('../utils/tags');
+
 // 채팅방 생성
 const createChatRoom = async (req, res) => {
-    const { roomName, roomDescription, roomTitleImage } = req.body;
+    const { roomName, roomDescription, roomTitleImage, tags } = req.body;
 
     // roomName 이 넘어왔는지 확인
     if (!roomName) {
         return res
             .status(400)
             .json({ message: '채팅방 이름은 반드시 설정해야 합니다.' });
+    }
+
+    // tags 유효성 수동 검증 - 2중 검증으로 안정성 높이기
+    if (tags && !tags.every(tag => allowedTags.includes(tag))) {
+        return res
+            .status(400)
+            .json({ message: '사용할 수 없는 태그가 포함되어 있습니다.' });
     }
 
     try {
@@ -31,6 +41,7 @@ const createChatRoom = async (req, res) => {
             titleImage: roomTitleImage,
             roomCreator: req.user.userId, // JWT 인증에서 받아온 ID
             participants: [req.user.userId], // 참여자 리스트에 초기 값으로 생성한 사용자를 추가
+            tags: tags,
         });
 
         // 새롭게 저장 - 추후에 리팩터링 시 create() 메서드 사용 고려 중
@@ -291,6 +302,7 @@ const leaveChatRoom = async (req, res) => {
     }
 };
 
+// 참여자 목록 조회
 const getParticipants = async (req, res) => {
     const roomId = req.params.id;
 
@@ -301,12 +313,14 @@ const getParticipants = async (req, res) => {
             'username email'
         );
 
+        // 채팅방 존재 여부 확인
         if (!chatRoom) {
             return res
                 .status(404)
                 .json({ message: '채팅방을 찾을 수 없습니다.' });
         }
 
+        // 채팅방 참여자 목록이 0 이하의 값인지 확인
         if (!chatRoom.participants.length <= 0) {
             return res
                 .status(404)
@@ -378,6 +392,7 @@ const kickUserFromChatRoom = async (req, res) => {
                 .json({ message: '사용자를 찾을 수 없습니다.' });
         }
 
+        // 소켓 알림
         req.io.to(roomId).emit('userKicked', {
             userId: targetUserId,
             username: kickedUser.username,
