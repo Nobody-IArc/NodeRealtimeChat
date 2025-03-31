@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 // JSDoc
 /**
  * @typedef {Object} PostSchema
+ * @property {import('mongoose').Types.ObjectId} _id
  * @property {import('mongoose').Types.ObjectId} writer
  * @property {string} title
  * @property {string} content
@@ -33,4 +34,5 @@ const postSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
+/** @type {import('mongoose').Model<PostSchema>} */
 module.exports = mongoose.model('Post', postSchema);

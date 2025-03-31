@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 // JSDoc
 /**
  * @typedef {Object} ChatRoomSchema
+ * @property {import('mongoose').Types.ObjectId} _id
  * @property {string} roomName
  * @property {string} [description]
  * @property {string} [titleImage]
@@ -58,4 +59,5 @@ const chatRoomSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+/** @type {import('mongoose').Model<ChatRoomSchema>} */
 module.exports = mongoose.model('ChatRoom', chatRoomSchema);

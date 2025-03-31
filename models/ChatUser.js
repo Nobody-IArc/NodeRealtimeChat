@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 // JSDoc
 /**
  * @typedef {Object} ChatUserSchema
+ * @property {import('mongoose').Types.ObjectId} _id
  * @property {string} username
  * @property {string} email
  * @property {string} password
@@ -31,4 +32,5 @@ const chatUserSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+/** @type {import('mongoose').Model<ChatUserSchema>} */
 module.exports = mongoose.model('ChatUser', chatUserSchema);

@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 /**
  * @typedef {Object} TagSchema
+ * @property {import('mongoose').Types.ObjectId} _id
  * @property {string} name
  * @property {string} showName
  * @property {string} [description]
@@ -45,4 +46,5 @@ const tagSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+/** @type {import('mongoose').Model<TagSchema>} */
 module.exports = mongoose.model('Tag', tagSchema);
