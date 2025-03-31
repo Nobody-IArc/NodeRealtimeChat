@@ -11,11 +11,11 @@ const ChatUser = require('../models/ChatUser');
 const Message = require('../models/Message');
 
 // 허용된 태그 목록 가져오기
-const allowedTags = require('../utils/tags');
+// const allowedTags = require('../utils/tags');
 
 // 채팅방 생성
 const createChatRoom = async (req, res) => {
-    const { roomName, roomDescription, roomTitleImage, tags } = req.body;
+    const { roomName, roomDescription, roomTitleImage } = req.body;
 
     // roomName 이 넘어왔는지 확인
     if (!roomName) {
@@ -24,12 +24,14 @@ const createChatRoom = async (req, res) => {
             .json({ message: '채팅방 이름은 반드시 설정해야 합니다.' });
     }
 
-    // tags 유효성 수동 검증 - 2중 검증으로 안정성 높이기
+    // tags 유효성 수동 검증 - 2중 검증으로 안정성 높이기 - tags 모델화 결정으로 주석 처리
+    /*
     if (tags && !tags.every(tag => allowedTags.includes(tag))) {
         return res
             .status(400)
             .json({ message: '사용할 수 없는 태그가 포함되어 있습니다.' });
     }
+     */
 
     try {
         // req 에서 받아온 값으로 새로운 도큐먼트에 값 매핑
@@ -41,7 +43,6 @@ const createChatRoom = async (req, res) => {
             titleImage: roomTitleImage,
             roomCreator: req.user.userId, // JWT 인증에서 받아온 ID
             participants: [req.user.userId], // 참여자 리스트에 초기 값으로 생성한 사용자를 추가
-            tags: tags,
         });
 
         // 새롭게 저장 - 추후에 리팩터링 시 create() 메서드 사용 고려 중
