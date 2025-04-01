@@ -14,6 +14,9 @@ const Message = require('../models/Message');
 /** @type {import('mongoose').Model<import('../models/Tag').TagSchema>} */
 const Tag = require('../models/Tag');
 
+// 태그 유효성 검증 함수
+const validateTags = require('../utils/validateTags');
+
 // 채팅방 생성
 const createChatRoom = async (req, res) => {
     const { roomName, roomDescription, roomTitleImage, tags } = req.body;
@@ -26,19 +29,11 @@ const createChatRoom = async (req, res) => {
     }
 
     // Tag 유효성 검사
-    let validTags = [];
-    if (tags && Array.isArray(tags) && tags.length > 0) {
-        /** @type {import('mongoose').Document & TagSchema[]} */
-        const foundTags = await Tag.find({ _id: { $in: tags } });
-
-        // 배열 길이가 같은지 확인
-        if (foundTags.length !== tags.length) {
-            return res
-                .status(400)
-                .json({ message: '사용할 수 없는 태그가 포함되어 있습니다.' });
-        }
-
-        validTags = foundTags.map(tag => tag._id);
+    const { isValid, validTags } = validateTags(tags);
+    if (isValid === false) {
+        return res
+            .status(400)
+            .send({ message: '사용할 수 없는 태그가 포함되어 있습니다.' });
     }
 
     try {
@@ -140,14 +135,14 @@ const getChatRoomById = async (req, res) => {
 const updateChatRoom = async (req, res) => {
     const roomId = req.params.id;
     const userId = req.user.userId;
-    const { roomName, roomDescription, roomTitleImage } = req.body;
+    const { roomName, roomDescription, roomTitleImage, tags } = req.body;
 
     try {
         /** @type {import('mongoose').Document & ChatRoomSchema} */
         const chatRoom = await ChatRoom.findById(roomId);
 
         // 전달된 값이 존재하는지 확인
-        if (!roomName || !roomDescription || !roomTitleImage) {
+        if (!roomName && !roomDescription && !roomTitleImage && !tags) {
             return res
                 .status(400)
                 .json({ message: '수정 값을 입력해야 합니다.' });
@@ -165,10 +160,20 @@ const updateChatRoom = async (req, res) => {
             return res.status(403).json({ message: '수정 권한이 없습니다.' });
         }
 
+        // Tag 유효성 검증
+        const { isValid, validTags } = validateTags(tags);
+        if (isValid === false) {
+            return res
+                .status(400)
+                .json({ message: '사용할 수 없는 태그가 포함되어 있습니다.' });
+        }
+
         // 변경된 필드가 있는 경우에만 수정
-        if (roomName) chatRoom.roomName = roomName;
-        if (roomDescription) chatRoom.description = roomDescription;
-        if (roomTitleImage) chatRoom.titleImage = roomTitleImage;
+        if (roomName !== undefined) chatRoom.roomName = roomName;
+        if (roomDescription !== undefined)
+            chatRoom.description = roomDescription;
+        if (roomTitleImage !== undefined) chatRoom.titleImage = roomTitleImage;
+        if (tags !== undefined) chatRoom.tags = validTags;
 
         await chatRoom.save();
 
