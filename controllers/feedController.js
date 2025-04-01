@@ -21,33 +21,39 @@ const getRandomFeed = async (req, res) => {
             ? { tags: mongoose.Types.ObjectId(tagId) }
             : {};
 
+        // 중복 코드를 PipeLine 형식으로 리팩터링
+        const joinWriterPipeline = [
+            {
+                $lookup: {
+                    // ^ join 기능 연산자
+                    from: 'chatusers', // 소문자 복수형 - MongoDB 컬렉션 처리 방식
+                    localField: 'writer',
+                    foreignField: '_id',
+                    as: 'writerInfo',
+                },
+            },
+            { $unwind: '$writerInfo' }, // 배열 -> 객체 변환
+            {
+                $project: {
+                    // ^ 원하는 필드만 필터링
+                    content: 1,
+                    createdAt: 1,
+                    writer: '$writerInfo.username',
+                    tags: 1,
+                },
+            },
+        ];
+
         // tagId 가 있는 경우
         if (tagId) {
             /** @type {import('mongoose').Document & PostSchema[]} */
             const randomPosts = await Post.aggregate([
                 { $match: matchStage },
                 { $sample: { size: limit } }, // 랜덤으로 Document 가져오는 연산자
-                {
-                    $lookup: {
-                        // ^ Join 연산자
-                        from: 'chatusers', // 소문자 복수형 자동 변환 - MongoDB 컬렉션 저장 방식
-                        localField: 'writer',
-                        foreignField: '_id',
-                        as: 'writerInfo',
-                    },
-                },
-                { $unwind: '$writerInfo' }, // 배열 -> 객체
-                {
-                    $project: {
-                        // ^ 원하는 필드만 필터링
-                        content: 1,
-                        createdAt: 1,
-                        writer: '$writerInfo.username',
-                        tags: 1,
-                    },
-                },
+                ...joinWriterPipeline,
             ]);
 
+            // .length 속성으로 limit 수와의 차이 점검
             const fetchedCount = randomPosts.length;
 
             // limit 수 보다 적은 게시글을 찾았다면 랜덤으로 다른 게시글 추가
@@ -61,23 +67,7 @@ const getRandomFeed = async (req, res) => {
                         },
                     },
                     { $sample: { size: extraCount } },
-                    {
-                        $lookup: {
-                            from: 'chatusers',
-                            localField: 'writer',
-                            foreignField: '_id',
-                            as: 'writerInfo',
-                        },
-                    },
-                    { $unwind: '$writerInfo' },
-                    {
-                        $project: {
-                            content: 1,
-                            createdAt: 1,
-                            writer: '$writerInfo.username',
-                            tags: 1,
-                        },
-                    },
+                    ...joinWriterPipeline,
                 ]);
 
                 const resultPosts = [...randomPosts, ...extraPosts];
@@ -96,23 +86,7 @@ const getRandomFeed = async (req, res) => {
             // ^ tagId 가 없는 경우
             const randomPosts = await Post.aggregate([
                 { $sample: { size: limit } },
-                {
-                    $lookup: {
-                        from: 'chatusers',
-                        localField: 'writer',
-                        foreignField: '_id',
-                        as: 'writerInfo',
-                    },
-                },
-                { $unwind: '$writerInfo' },
-                {
-                    $project: {
-                        content: 1,
-                        createdAt: 1,
-                        writer: '$writerInfo.username',
-                        tags: 1,
-                    },
-                },
+                ...joinWriterPipeline,
             ]);
 
             return res.status(200).json({
