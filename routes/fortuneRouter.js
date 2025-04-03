@@ -3,8 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
-const { getDailyFortune } = require('../controllers/fortuneController');
+const {
+    getDailyFortune,
+    getFortuneCookie,
+} = require('../controllers/fortuneController');
 
-router.get('/', authMiddleware, getDailyFortune);
+router.get('/daily', authMiddleware, getDailyFortune);
+router.get('/fortune-cookie', authMiddleware, getFortuneCookie);
 
 module.exports = router;

@@ -12,7 +12,10 @@
  */
 
 /** @type {TarotCard[]} */
-const tarotCards = require('../tarot/tarotCards');
+const tarotCards = require('../fortunes/tarotCards');
+
+/** @type {string[]} */
+const fortuneCookies = require('../fortunes/fortuneCookies');
 
 // Redis 연결 코드
 const redisConnect = require('../config/redisConnection');
@@ -77,4 +80,27 @@ const getDailyFortune = async (req, res) => {
     }
 };
 
-module.exports = { getDailyFortune };
+// 포춘 쿠키 기능
+const getFortuneCookie = async (req, res) => {
+    try {
+        const randomIndex = Math.floor(Math.random() * fortuneCookies.length);
+        const innerMessage = fortuneCookies[randomIndex];
+
+        if (!innerMessage) {
+            return res
+                .status(404)
+                .json({ message: '해당 인덱스 결과 조회 실패' });
+        }
+
+        res.status(200).json({
+            message: '포춘 쿠키 조회 성공',
+            fortuneCookie: innerMessage,
+        });
+    } catch (err) {
+        return res
+            .status(500)
+            .json({ message: '포춘 쿠키 조회 실패', error: err.message });
+    }
+};
+
+module.exports = { getDailyFortune, getFortuneCookie };
