@@ -8,7 +8,9 @@ const getTagStats = async (req, res) => {
     const userId = req.user.userId;
 
     try {
-        const joinedRooms = await ChatRoom.find({ participants: userId }).populate('tags');
+        const joinedRooms = await ChatRoom.find({
+            participants: userId,
+        }).populate('tags');
 
         const { tagCounts, topTag, comment } = analyzeTags(joinedRooms);
 
