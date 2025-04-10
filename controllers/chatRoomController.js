@@ -10,9 +10,9 @@ const ChatUser = require('../models/ChatUser');
 /** @type {import('mongoose').Model<import('../models/Message').MessageSchema>} */
 const Message = require('../models/Message');
 
-// 허용된 태그 목록 가져오기
+// 허용된 태그 목록 가져오기 - 안쓰는거 맞니?
 /** @type {import('mongoose').Model<import('../models/Tag').TagSchema>} */
-const Tag = require('../models/Tag');
+// const Tag = require('../models/Tag');
 
 // 태그 유효성 검증 함수
 const validateTags = require('../utils/validateTags');
